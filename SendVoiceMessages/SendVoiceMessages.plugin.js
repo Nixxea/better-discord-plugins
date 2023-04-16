@@ -3,6 +3,8 @@
  * @author Nixea
  * @version 0.1.0
  * @description Заменяет ogg аттачменты на войс месседжи
+ * @source https://github.com/Nixxea/better-discord-plugins
+ * @updateUrl https://raw.githubusercontent.com/Nixxea/better-discord-plugins/master/SendVoiceMessages/SendVoiceMessages.plugin.js
  */
 
 const { Patcher, Webpack } = BdApi;
