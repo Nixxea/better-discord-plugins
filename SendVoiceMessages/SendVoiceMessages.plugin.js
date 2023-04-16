@@ -1,7 +1,7 @@
 /**
  * @name SendVoiceMessages
  * @author Nixea
- * @version 0.1.0
+ * @version 0.1.1
  * @description Заменяет ogg аттачменты на войс месседжи
  * @source https://github.com/Nixxea/better-discord-plugins
  * @updateUrl https://raw.githubusercontent.com/Nixxea/better-discord-plugins/master/SendVoiceMessages/SendVoiceMessages.plugin.js
@@ -38,13 +38,13 @@ module.exports = class SendVoiceMessages {
                 const audio = await context.decodeAudioData(await readFile(file.item.file));
                 file.durationSecs = audio.duration;
                 
-                const maxWaves = Math.min(audio.duration * 2 | 0, 400);
+                const maxWaves = Math.max(10, Math.min(audio.duration * 2 | 0, 400));
                 const channel = audio.getChannelData(0);
                 const wavesLength = channel.byteLength / 4;
                 const step = wavesLength / maxWaves | 0;
                 const waves = Buffer.alloc(maxWaves);
 
-                let maxValue = 0;
+                let maxValue = 0.25; // увеличение волны не более, чем в 4 раза
                 for (const i32 of channel) {
                     const abs = Math.abs(i32);
                     if (abs > maxValue) maxValue = abs;
@@ -54,13 +54,14 @@ module.exports = class SendVoiceMessages {
                     let sum = 0;
                     let max = 0;
                     for (let i = 0; i < step; i++) {
-                        const val = channel[i + n];
+                        const val = Math.abs(channel[i + n]);
+                        if (!val) break;
                         sum += val;
                         if (val > max) max = val;
                     }
                     
                     // Кринж, а именно среднее арифметическое от максимума и среднего значения по волне
-                    waves[n / step] = ((max * 255) + (sum / maxValue / step * 255)) / 2 | 0;
+                    waves[n / step] = ((max / maxValue * 255) + (sum / maxValue / step * 255)) / 2 | 0;
                 }
 
                 file.waveform = waves.toString('base64');
