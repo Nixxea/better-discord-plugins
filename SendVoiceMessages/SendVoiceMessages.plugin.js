@@ -1,7 +1,7 @@
 /**
  * @name SendVoiceMessages
  * @author Nixea
- * @version 0.1.1
+ * @version 0.1.2
  * @description Заменяет ogg аттачменты на войс месседжи
  * @source https://github.com/Nixxea/better-discord-plugins
  * @updateUrl https://raw.githubusercontent.com/Nixxea/better-discord-plugins/master/SendVoiceMessages/SendVoiceMessages.plugin.js
@@ -32,13 +32,14 @@ module.exports = class SendVoiceMessages {
             const file = self.files?.[0];
             if (file?.mimeType === "audio/ogg") {
                 file.filename = 'voice-message.ogg';
-                args[1].flags = 8192;
+                args[1].flags ??= 0;
+                args[1].flags |= 8192;
 
                 const context = new AudioContext();
                 const audio = await context.decodeAudioData(await readFile(file.item.file));
                 file.durationSecs = audio.duration;
                 
-                const maxWaves = Math.max(10, Math.min(audio.duration * 2 | 0, 400));
+                const maxWaves = Math.max(10, Math.min(audio.duration * 2 | 0, 300));
                 const channel = audio.getChannelData(0);
                 const wavesLength = channel.byteLength / 4;
                 const step = wavesLength / maxWaves | 0;
